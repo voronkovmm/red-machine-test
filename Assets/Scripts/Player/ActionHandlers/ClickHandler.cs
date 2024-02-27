@@ -15,7 +15,6 @@ namespace Player.ActionHandlers
         public event Action<Vector3> PointerUpEvent;
         public event Action<Vector3> DragStartEvent;
         public event Action<Vector3> DragEndEvent;
-        public event Action<Vector3> DragEvent;
 
         private Vector3 _pointerDownPosition;
 
@@ -60,9 +59,6 @@ namespace Player.ActionHandlers
 
         private void LateUpdate()
         {
-            if (_isDrag)
-                DragEvent?.Invoke(CameraHolder.Instance.MainCamera.ScreenToWorldPoint(Input.mousePosition));
-
             if (!_isClick)
                 return;
 

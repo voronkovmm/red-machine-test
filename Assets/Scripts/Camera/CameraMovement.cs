@@ -34,7 +34,6 @@ public class CameraMovement : MonoBehaviour
         ClickHandler clickHandler = ClickHandler.Instance;
         clickHandler.DragStartEvent += OnDragStart;
         clickHandler.DragEndEvent   += OnDragEnd;
-        clickHandler.DragEvent      += OnDrag;
 
         EventsController.Subscribe<NodeTapped>(this, OnNodeTapped);
     }
@@ -45,13 +44,14 @@ public class CameraMovement : MonoBehaviour
     {
         endClickPoint = vector;
 
-        if (movementType != EnumMovementType.RELEASE || !isMovement)
-            return;
-
         if (coroutineMove != null)
+        {
             StopCoroutine(coroutineMove);
+            coroutineMove = null;
+        }
 
-        coroutineMove = StartCoroutine(MoveReleaseRoutine());
+        if (movementType == EnumMovementType.RELEASE && isMovement)
+            coroutineMove = StartCoroutine(MoveReleaseRoutine());
     }
     private void OnDragStart(Vector3 vector)
     {
@@ -59,15 +59,9 @@ public class CameraMovement : MonoBehaviour
         isNodeTapped = false;
 
         startClickPoint = vector;
-    }
-    private void OnDrag(Vector3 vector)
-    {
-        endClickPoint = vector;
 
-        if (movementType != EnumMovementType.DRAG || coroutineMove != null || !isMovement)
-            return;
-
-        coroutineMove = StartCoroutine(MoveDragRoutine());
+        if (movementType == EnumMovementType.DRAG && isMovement && coroutineMove == null)
+            coroutineMove = StartCoroutine(MoveDragRoutine());
     }
 
     private IEnumerator MoveReleaseRoutine()
@@ -108,12 +102,13 @@ public class CameraMovement : MonoBehaviour
     }
     private IEnumerator MoveDragRoutine()
     {
-
         Vector3 velocity = Vector3.zero;
         float z = cameraTransform.position.z;
 
-        while (Input.GetMouseButton(0))
+        while (!Input.GetMouseButtonUp(0))
         {
+            endClickPoint = CameraHolder.Instance.MainCamera.ScreenToWorldPoint(Input.mousePosition);
+
             Vector3 cameraPos = cameraTransform.position;
             Vector3 dirNormalInvert = (endClickPoint - startClickPoint).normalized * -1;
             float distance = Vector3.Distance(endClickPoint, startClickPoint);
