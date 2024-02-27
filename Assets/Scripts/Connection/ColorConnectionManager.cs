@@ -38,12 +38,14 @@ namespace Connection
             }
 
             _clickHandler = ClickHandler.Instance;
-            _clickHandler.SetDragEventHandlers(OnDragStart, OnDragEnd);
+            _clickHandler.DragStartEvent += OnDragStart;
+            _clickHandler.DragEndEvent   += OnDragEnd;
         }
 
         private void OnDestroy()
         {
-            _clickHandler.ClearEvents();
+            _clickHandler.DragStartEvent -= OnDragStart;
+            _clickHandler.DragStartEvent -= OnDragEnd;
         }
 
         private void StartConnecting(ColorNode colorNode)
